@@ -43,29 +43,35 @@ func startGame() {
 
 	fmt.Println("Cards: ", cards)
 
-	length := len(cards)
+	cards = shuffle(cards)
 
-	shuffled := make([]int, length)
+	fmt.Print("Final: ", cards)
 
-	for i := 0; i < length; i++ {
+}
+
+func shuffle(deck []int) []int {
+
+	shuffled := make([]int, len(deck))
+
+	fmt.Println("Length of Shuffled: ", len(shuffled))
+
+	for i := 0; i < len(shuffled); i++ {
 
 		rand.Seed(time.Now().UnixNano())
-		roll := rand.Intn(len(cards))
+		roll := rand.Intn(len(deck))
 
-		fmt.Println("roll: ", roll)
+		shuffled[i] = deck[roll]
 
-		shuffled[i] = cards[roll]
-
-		cards = RemoveIndex(cards, roll)
-
-		fmt.Println("Remaining Cards: ", cards)
-		fmt.Println("Shuffled: ", shuffled)
-		fmt.Println("i: ", i)
-
+		deck = RemoveIndex(deck, roll)
 	}
 
+	return shuffled
 }
 
 func RemoveIndex(i []int, index int) []int {
 	return append(i[:index], i[index+1:]...)
+}
+
+func deal() {
+
 }
