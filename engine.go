@@ -13,7 +13,7 @@ import (
 
 var diamonds, clubs, hearts, spades [13]int
 
-var arrayLength int
+var arrayLength, gamePlayed int
 
 func startGame() []int {
 
@@ -79,10 +79,14 @@ func game() {
 
 	playableDeck := startGame()
 
+	fmt.Println("Game Played: ", gamePlayed)
+
 	player := [10]int{}
 	dealer := [10]int{}
 	playerHand := [10]string{}
 	dealerHand := [10]string{}
+	dealerAce := 0
+	playerAce := 0
 
 	round := 0
 
@@ -91,9 +95,9 @@ func game() {
 	pHand := 0
 	dHand := 0
 
-	pHand = summation(player)
+	pHand, playerAce = summation(player, playerAce)
 
-	dHand = summation(dealer)
+	dHand, dealerAce = summation(dealer, dealerAce)
 
 	fmt.Println("Player Hand: ", playerHand, ", ", pHand)
 	fmt.Println("Dealer Hand: ", dealerHand, ", ", dHand)
@@ -104,7 +108,7 @@ func game() {
 		fmt.Scanln(&input)
 
 		if input == "H" {
-			playableDeck, player, playerHand, round, pHand = hit(playableDeck, player, playerHand, round)
+			playableDeck, player, playerHand, round, pHand, playerAce = hit(playableDeck, player, playerHand, round, playerAce)
 
 			fmt.Println("Player Hand: ", playerHand, ", ", pHand)
 			fmt.Println("Dealer Hand: ", dealerHand, ", ", dHand)
@@ -118,7 +122,7 @@ func game() {
 
 		if input == "S" {
 			fmt.Println("Player Stands")
-			playableDeck, dealer, dealerHand, dHand = stand(playableDeck, dealer, dealerHand, dHand)
+			playableDeck, dealer, dealerHand, dHand, dealerAce = stand(playableDeck, dealer, dealerHand, dHand, dealerAce)
 			break
 		}
 	}
@@ -129,14 +133,24 @@ func game() {
 
 }
 
+func checkAce(ace, hand int) (newHand int) {
+	if hand > 21 {
+		if ace > 0 {
+			hand -= 10
+			ace--
+		}
+	}
+	return
+}
+
 func score(pHand int, dHand int) (result string) {
-	if pHand > dHand {
+	if pHand > dHand && pHand <= 21 {
 		result = "Player Wins"
 	}
 	if pHand == dHand {
 		result = "Push"
 	}
-	if pHand < dHand {
+	if pHand < dHand && dHand <= 21 {
 		result = "Dealer Wins"
 	}
 
@@ -172,7 +186,9 @@ func deal(deck []int, player, dealer [10]int, playerHand [10]string, dealerHand 
 			if newDeck[0] < 11 {
 				newDealerHand[di] = strconv.Itoa(newDeck[0])
 				newDealer[di] = newDeck[0]
-
+			}
+			if newDealer[di] == 1 {
+				newDealerHand[di] = "A"
 			}
 			di++
 		} else {
@@ -192,6 +208,9 @@ func deal(deck []int, player, dealer [10]int, playerHand [10]string, dealerHand 
 				newPlayerHand[pi] = strconv.Itoa(newDeck[0])
 				newPlayer[pi] = newDeck[0]
 			}
+			if newPlayer[pi] == 1 {
+				newPlayerHand[pi] = "A"
+			}
 			pi++
 		}
 
@@ -202,7 +221,35 @@ func deal(deck []int, player, dealer [10]int, playerHand [10]string, dealerHand 
 	return
 }
 
-func hit(deck []int, player [10]int, playerHand [10]string, round int) (newDeck []int, newPlayer [10]int, newPlayerHand [10]string, newRound int, pHand int) {
+func playerAdd(deck []int, side [10]int, sideHand [10]string, round int) (newSide [10]int, newSideHand [10]string) {
+
+	newSide = side
+	newSideHand = sideHand
+
+	if deck[0] == 11 {
+		newSideHand[round+1] = "J"
+		newSide[round+1] = 10
+	}
+	if deck[0] == 12 {
+		newSideHand[round+1] = "Q"
+		newSide[round+1] = 10
+	}
+	if deck[0] == 13 {
+		newSideHand[round+1] = "K"
+		newSide[round+1] = 10
+	}
+	if deck[0] < 11 {
+		newSideHand[round+1] = strconv.Itoa(deck[0])
+		newSide[round+1] = deck[0]
+	}
+	if newSide[round+1] == 1 {
+		newSideHand[round+1] = "A"
+	}
+
+	return
+}
+
+func hit(deck []int, player [10]int, playerHand [10]string, round, ace int) (newDeck []int, newPlayer [10]int, newPlayerHand [10]string, newRound int, pHand, newAce int) {
 
 	fmt.Println("Player Hits")
 
@@ -214,49 +261,36 @@ func hit(deck []int, player [10]int, playerHand [10]string, round int) (newDeck 
 
 	newDeck = deck
 
-	if newDeck[0] == 11 {
-		newPlayerHand[newRound+1] = "J"
-		newPlayer[newRound+1] = 10
-	}
-	if newDeck[0] == 12 {
-		newPlayerHand[newRound+1] = "Q"
-		newPlayer[newRound+1] = 10
-	}
-	if newDeck[0] == 13 {
-		newPlayerHand[newRound+1] = "K"
-		newPlayer[newRound+1] = 10
-	}
-	if newDeck[0] < 11 {
-		newPlayerHand[newRound+1] = strconv.Itoa(newDeck[0])
-		newPlayer[newRound+1] = newDeck[0]
-	}
-
-	//newPlayer[newRound+1] = deck[0]
+	newPlayer, newPlayerHand = playerAdd(deck, player, playerHand, newRound)
 
 	newDeck = RemoveIndex(deck, 0)
 
-	pHand = summation(newPlayer)
+	pHand, newAce = summation(newPlayer, ace)
 
 	return
 
 }
 
-func summation(hand [10]int) (sum int) {
+func summation(hand [10]int, ace int) (sum, newAce int) {
 	for i := range hand {
 		if hand[i] > 10 {
 			sum += 10
+		} else if hand[i] == 1 {
+			sum += 11
+			if sum > 21 {
+				sum = sum - 10
+			}
 		} else {
 			sum += hand[i]
 		}
 	}
-	return sum
+
+	newAce = checkAce(ace, sum)
+
+	return
 }
 
-func checkAce() {
-
-}
-
-func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand int) (newDeck []int, newDealer [10]int, newDealerHand [10]string, newdHand int) {
+func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand, dealerAce int) (newDeck []int, newDealer [10]int, newDealerHand [10]string, newdHand, newdAce int) {
 
 	newdHand = dHand
 	newDealer = dealer
@@ -265,6 +299,7 @@ func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand int) (newDec
 	i := 1
 
 	newDealer[i] = newDeck[0]
+
 	if newDeck[0] == 11 {
 		newDealerHand[i] = "J"
 		newDealer[i] = 10
@@ -281,8 +316,11 @@ func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand int) (newDec
 		newDealerHand[i] = strconv.Itoa(newDeck[0])
 		newDealer[i] = newDeck[0]
 	}
+	if newDealer[i] == 1 {
+		newDealerHand[i] = "A"
+	}
 
-	newdHand = summation(newDealer)
+	newdHand, newdAce = summation(newDealer, dealerAce)
 
 	fmt.Println("Dealer Hand: ", newDealerHand, ", ", newdHand)
 
@@ -290,7 +328,7 @@ func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand int) (newDec
 
 	i++
 
-	newdHand = summation(newDealer)
+	newdHand, newdAce = summation(newDealer, dealerAce)
 
 	for newdHand < 17 {
 		fmt.Println("Dealer Hits")
@@ -310,23 +348,28 @@ func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand int) (newDec
 			newDealerHand[i] = strconv.Itoa(newDeck[0])
 			newDealer[i] = newDeck[0]
 		}
+		if newDeck[0] == 1 {
+			newDealerHand[i] = "A"
+			newDealer[i] = 11
+		}
 
 		newDeck = RemoveIndex(newDeck, 0)
 
 		i++
 
-		newdHand = summation(newDealer)
+		newdHand, newdAce = summation(newDealer, dealerAce)
 
 		fmt.Println("Dealer Hand: ", newDealerHand, ", ", newdHand)
 
 	}
 
-	newdHand = summation(newDealer)
+	//newdHand, newdAce = summation(newDealer, dealerAce)
 
 	if newdHand <= 21 {
 		fmt.Println("Dealer Stands")
 	} else {
 		fmt.Println("Dealer Busts")
+		fmt.Println("Player Wins")
 	}
 
 	return
