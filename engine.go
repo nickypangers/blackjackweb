@@ -13,9 +13,13 @@ import (
 
 var diamonds, clubs, hearts, spades [13]int
 
+var playableDeck []int
+
 var arrayLength, gamePlayed int
 
 func startGame() []int {
+
+	gamePlayed = 0
 
 	for i := 0; i < 13; i++ {
 		diamonds[i] = i + 1
@@ -48,6 +52,8 @@ func startGame() []int {
 
 	fmt.Print("Final: ", cards)
 
+	gamePlayed++
+
 	return cards
 
 }
@@ -77,7 +83,11 @@ func RemoveIndex(i []int, index int) []int {
 
 func game() {
 
-	playableDeck := startGame()
+	if gamePlayed == 0 {
+
+		playableDeck = startGame()
+
+	}
 
 	fmt.Println("Game Played: ", gamePlayed)
 
@@ -363,13 +373,11 @@ func stand(deck []int, dealer [10]int, dealerHand [10]string, dHand, dealerAce i
 
 	}
 
-	//newdHand, newdAce = summation(newDealer, dealerAce)
-
+	// check if dealer busts
 	if newdHand <= 21 {
 		fmt.Println("Dealer Stands")
 	} else {
 		fmt.Println("Dealer Busts")
-		fmt.Println("Player Wins")
 	}
 
 	return
