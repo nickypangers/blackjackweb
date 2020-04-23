@@ -226,21 +226,13 @@ func hit(playerHand []string, player []int, playerScore int) (newPlayerHand []st
 func summation(hand []int) (sum int) {
 	ace := 0
 	for i := range hand {
-		if hand[i] > 10 {
-			sum += 10
-		} else if hand[i] == 1 {
-			sum += 11
+		sum += hand[i]
+		if hand[i] == 11 {
 			ace++
-		} else {
-			sum += hand[i]
 		}
-		for sum > 21 {
-			if ace > 0 {
-				sum -= 10
-				ace--
-			} else {
-				break
-			}
+		if sum > 21 && ace > 0 {
+			sum -= 10
+			ace--
 		}
 	}
 
