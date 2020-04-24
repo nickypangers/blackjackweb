@@ -9,6 +9,8 @@ import (
 
 var deck []int
 
+var gameInt int
+
 func game() {
 
 	// dealer face cards
@@ -22,18 +24,19 @@ func game() {
 	dealerScore := 0
 	playerScore := 0
 
-	game := 0
-
 	var input string
 
 	i := 0
 
-	if game == 0 {
+	fmt.Println("gameInt: ", gameInt)
+
+	if gameInt == 0 {
 		setDeck()
 		deck = shuffle()
-
-		game++
+		gameInt++
 	}
+
+	fmt.Println("Deck length: ", len(deck))
 	// deal
 	dealerHand, playerHand, dealer, player, dealerScore, playerScore = deal(dealerHand, playerHand, dealer, player, dealerScore, playerScore)
 
@@ -127,8 +130,6 @@ func shuffle() []int {
 	// create new array for shuffled deck
 	shuffled := []int{}
 
-	// fmt.Println("Length of shuffled: ", len(shuffled))
-
 	// shuffle cards
 	for i := 0; i < deckLength; i++ {
 
@@ -139,17 +140,20 @@ func shuffle() []int {
 		// append randomly selected card in deck to shuffle
 		shuffled = append(shuffled, deck[roll])
 
-		fmt.Println("Shuffled length: ", len(shuffled))
+		// fmt.Println("Shuffled length: ", len(shuffled))
 
-		//fmt.Println("Shuffled: ", shuffled[i], ", roll: ", roll)
+		// fmt.Println("Shuffled: ", shuffled[i], ", roll: ", roll)
 
 		// remove selected card from deck
 		deck = removeIndex(deck, roll)
 	}
 
-	fmt.Println("Shuffled: ", shuffled)
+	// fmt.Println("Shuffled: ", shuffled)
 
-	fmt.Println("Check: ", shuffled[1])
+	// fmt.Println("Check: ", shuffled[1])
+
+	// fmt.Println("Length of shuffled: ", len(shuffled))
+
 	// return shuffled deck
 	return shuffled
 }
