@@ -28,8 +28,6 @@ func game() {
 
 	i := 0
 
-	fmt.Println("gameInt: ", gameInt)
-
 	if gameInt == 0 {
 		setDeck()
 		deck = shuffle()
@@ -43,33 +41,38 @@ func game() {
 	fmt.Println("Player: ", playerHand, ", ", playerScore)
 	fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
 
-	for {
-		input = getInput(input)
-		if input == "H" || input == "h" {
+	if playerScore == 21 && dealerScore != 11 {
+		fmt.Println("Player Blackjack")
+		fmt.Println("Player Wins")
+	} else {
+		for {
+			input = getInput(input)
+			if input == "H" || input == "h" {
 
-			// hit
-			playerHand, player, playerScore = hit(playerHand, player, playerScore)
-			fmt.Println("Player: ", playerHand, ", ", playerScore)
-			fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
-			i++
-			if playerScore > 21 {
-				fmt.Println("Player Busts")
-				fmt.Println("Dealer Wins")
+				// hit
+				playerHand, player, playerScore = hit(playerHand, player, playerScore)
+				fmt.Println("Player: ", playerHand, ", ", playerScore)
+				fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
+				i++
+				if playerScore > 21 {
+					fmt.Println("Player Busts")
+					fmt.Println("Dealer Wins")
+					break
+				}
+			}
+			if input == "S" || input == "s" {
+				fmt.Println("Player Stands")
+				fmt.Println("Player: ", playerHand, ", ", playerScore)
+				// stand -> dealer plays
+				dealerHand, dealer, dealerScore = dealerPlay(dealerHand, dealer, dealerScore)
+				fmt.Println("Player: ", playerHand, ", ", playerScore)
+				fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
 				break
 			}
 		}
-		if input == "S" || input == "s" {
-			fmt.Println("Player Stands")
-			fmt.Println("Player: ", playerHand, ", ", playerScore)
-			// stand -> dealer plays
-			dealerHand, dealer, dealerScore = dealerPlay(dealerHand, dealer, dealerScore)
-			fmt.Println("Player: ", playerHand, ", ", playerScore)
-			fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
-			break
-		}
-	}
 
-	checkScore(dealerScore, playerScore)
+		checkScore(dealerScore, playerScore)
+	}
 
 }
 
@@ -115,7 +118,7 @@ func setDeck() {
 		}
 	}
 
-	fmt.Println("deck: ", deck, ", length: ", len(deck))
+	// fmt.Println("deck: ", deck, ", length: ", len(deck))
 
 	// return combined deck
 	return
@@ -195,10 +198,6 @@ func appendHand(hand []string, side []int, sideScore int) (newHand []string, new
 
 }
 
-func blackjackCheck() {
-
-}
-
 func deal(dealerHand, playerHand []string, dealer, player []int, dealerScore, playerScore int) (newDealerHand, newPlayerHand []string, newDealer, newPlayer []int, newDealerScore, newPlayerScore int) {
 
 	newDealerHand = dealerHand
@@ -257,13 +256,19 @@ func dealerPlay(dealerHand []string, dealer []int, dealerScore int) (newDealerHa
 	newDealerHand, newDealer, newDealerScore = appendHand(newDealerHand, newDealer, newDealerScore)
 	fmt.Println("Dealer: ", newDealerHand, ", ", newDealerScore)
 
-	for newDealerScore < 17 {
-		fmt.Println("Dealer Hits")
-		newDealerHand, newDealer, newDealerScore = appendHand(newDealerHand, newDealer, newDealerScore)
-		fmt.Println("Dealer: ", newDealerHand, ", ", newDealerScore)
-	}
+	if newDealerScore == 21 {
+		fmt.Println("Dealer Blackjack")
+	} else {
 
-	fmt.Println("Dealer Stands")
+		for newDealerScore < 17 {
+			fmt.Println("Dealer Hits")
+			newDealerHand, newDealer, newDealerScore = appendHand(newDealerHand, newDealer, newDealerScore)
+			fmt.Println("Dealer: ", newDealerHand, ", ", newDealerScore)
+		}
+
+		fmt.Println("Dealer Stands")
+
+	}
 
 	// newDealerScore = summation(newDealer)
 
