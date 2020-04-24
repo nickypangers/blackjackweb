@@ -195,6 +195,10 @@ func appendHand(hand []string, side []int, sideScore int) (newHand []string, new
 
 }
 
+func blackjackCheck() {
+
+}
+
 func deal(dealerHand, playerHand []string, dealer, player []int, dealerScore, playerScore int) (newDealerHand, newPlayerHand []string, newDealer, newPlayer []int, newDealerScore, newPlayerScore int) {
 
 	newDealerHand = dealerHand
