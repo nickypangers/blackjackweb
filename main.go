@@ -6,12 +6,17 @@ func main() {
 
 	var input string
 
+	playerScore := 0
+	dealerScore := 0
+
 	for {
-		game()
-		fmt.Println("End game, press 1 to continue, 2 to quit")
+		playerScore, dealerScore = game(playerScore, dealerScore)
+		fmt.Printf("Your score: %d\nDealer's score: %d\n", playerScore, dealerScore)
+		// fmt.Println("Your score: ", playerScore, "")
+		fmt.Println("End game, press anything to continue, Q to quit")
 		fmt.Scanln(&input)
 
-		if input == "1" {
+		if input != "q" {
 			continue
 		} else {
 			break

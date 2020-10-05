@@ -11,7 +11,7 @@ var deck []int
 
 var gameInt int
 
-func game() {
+func game(playerScore, dealerScore int) (newPlayerScore, newDealerScore int) {
 
 	// dealer face cards
 	dealerHand := []string{}
@@ -21,8 +21,8 @@ func game() {
 	dealer := []int{}
 	player := []int{}
 
-	dealerScore := 0
-	playerScore := 0
+	dealerPoints := 0
+	playerPoints := 0
 
 	var input string
 
@@ -38,21 +38,25 @@ func game() {
 
 	fmt.Println("Deck length: ", len(deck))
 	// deal
-	dealerHand, playerHand, dealer, player, dealerScore, playerScore = deal(dealerHand, playerHand, dealer, player, dealerScore, playerScore)
+	dealerHand, playerHand, dealer, player, dealerPoints, playerPoints = deal(dealerHand, playerHand, dealer, player, dealerPoints, playerPoints)
 
-	fmt.Println("Player: ", playerHand, ", ", playerScore)
-	fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
+	fmt.Println("Player: ", playerHand, ", ", playerPoints)
+	fmt.Println("Dealer: ", dealerHand, ", ", dealerPoints)
 
 	for {
-		input = getInput(input)
+		if playerPoints == 21 {
+			input = "S"
+		} else {
+			input = getInput(input)
+		}
 		if input == "H" || input == "h" {
 
 			// hit
-			playerHand, player, playerScore = hit(playerHand, player, playerScore)
-			fmt.Println("Player: ", playerHand, ", ", playerScore)
-			fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
+			playerHand, player, playerPoints = hit(playerHand, player, playerPoints)
+			fmt.Println("Player: ", playerHand, ", ", playerPoints)
+			fmt.Println("Dealer: ", dealerHand, ", ", dealerPoints)
 			i++
-			if playerScore > 21 {
+			if playerPoints > 21 {
 				fmt.Println("Player Busts")
 				fmt.Println("Dealer Wins")
 				break
@@ -60,17 +64,25 @@ func game() {
 		}
 		if input == "S" || input == "s" {
 			fmt.Println("Player Stands")
-			fmt.Println("Player: ", playerHand, ", ", playerScore)
+			fmt.Println("Player: ", playerHand, ", ", playerPoints)
 			// stand -> dealer plays
-			dealerHand, dealer, dealerScore = dealerPlay(dealerHand, dealer, dealerScore)
-			fmt.Println("Player: ", playerHand, ", ", playerScore)
-			fmt.Println("Dealer: ", dealerHand, ", ", dealerScore)
+			dealerHand, dealer, dealerPoints = dealerPlay(dealerHand, dealer, dealerPoints)
+			fmt.Println("Player: ", playerHand, ", ", playerPoints)
+			fmt.Println("Dealer: ", dealerHand, ", ", dealerPoints)
 			break
 		}
 	}
 
-	checkScore(dealerScore, playerScore)
+	result := checkScore(dealerPoints, playerPoints)
 
+	if result == 1 {
+		newPlayerScore = playerScore + 1
+		newDealerScore = dealerScore
+		return newPlayerScore, newDealerScore
+	}
+	newPlayerScore = playerScore
+	newDealerScore = dealerScore + 1
+	return newPlayerScore, newDealerScore
 }
 
 func getInput(input string) string {
@@ -195,34 +207,34 @@ func appendHand(hand []string, side []int, sideScore int) (newHand []string, new
 
 }
 
-func deal(dealerHand, playerHand []string, dealer, player []int, dealerScore, playerScore int) (newDealerHand, newPlayerHand []string, newDealer, newPlayer []int, newDealerScore, newPlayerScore int) {
+func deal(dealerHand, playerHand []string, dealer, player []int, dealerPoints, playerPoints int) (newDealerHand, newPlayerHand []string, newDealer, newPlayer []int, newdealerPoints, newplayerPoints int) {
 
 	newDealerHand = dealerHand
 	newPlayerHand = playerHand
 	dealer = newDealer
 	player = newPlayer
-	newDealerScore = dealerScore
-	newPlayerScore = playerScore
+	newdealerPoints = dealerPoints
+	newplayerPoints = playerPoints
 
 	for i := 0; i < 3; i++ {
 		// set cards to respective J, Q, K or A if selected
 		if i == 1 {
-			newDealerHand, newDealer, newDealerScore = appendHand(newDealerHand, newDealer, newDealerScore)
+			newDealerHand, newDealer, newdealerPoints = appendHand(newDealerHand, newDealer, newdealerPoints)
 		} else {
-			newPlayerHand, newPlayer, newPlayerScore = appendHand(newPlayerHand, newPlayer, newPlayerScore)
+			newPlayerHand, newPlayer, newplayerPoints = appendHand(newPlayerHand, newPlayer, newplayerPoints)
 		}
 	}
 
 	return
 }
 
-func hit(playerHand []string, player []int, playerScore int) (newPlayerHand []string, newPlayer []int, newPlayerScore int) {
+func hit(playerHand []string, player []int, playerPoints int) (newPlayerHand []string, newPlayer []int, newplayerPoints int) {
 
 	newPlayerHand = playerHand
 	newPlayer = player
-	newPlayerScore = playerScore
+	newplayerPoints = playerPoints
 
-	newPlayerHand, newPlayer, newPlayerScore = appendHand(newPlayerHand, newPlayer, newPlayerScore)
+	newPlayerHand, newPlayer, newplayerPoints = appendHand(newPlayerHand, newPlayer, newplayerPoints)
 
 	return
 }
@@ -244,37 +256,47 @@ func summation(hand []int) (sum int) {
 
 }
 
-func dealerPlay(dealerHand []string, dealer []int, dealerScore int) (newDealerHand []string, newDealer []int, newDealerScore int) {
+func dealerPlay(dealerHand []string, dealer []int, dealerPoints int) (newDealerHand []string, newDealer []int, newdealerPoints int) {
 
 	newDealer = dealer
 	newDealerHand = dealerHand
-	newDealerScore = dealerScore
+	newdealerPoints = dealerPoints
 
-	newDealerHand, newDealer, newDealerScore = appendHand(newDealerHand, newDealer, newDealerScore)
-	fmt.Println("Dealer: ", newDealerHand, ", ", newDealerScore)
+	newDealerHand, newDealer, newdealerPoints = appendHand(newDealerHand, newDealer, newdealerPoints)
+	fmt.Println("Dealer: ", newDealerHand, ", ", newdealerPoints)
 
-	for newDealerScore < 17 {
+	for newdealerPoints < 17 {
 		fmt.Println("Dealer Hits")
-		newDealerHand, newDealer, newDealerScore = appendHand(newDealerHand, newDealer, newDealerScore)
-		fmt.Println("Dealer: ", newDealerHand, ", ", newDealerScore)
+		newDealerHand, newDealer, newdealerPoints = appendHand(newDealerHand, newDealer, newdealerPoints)
+		fmt.Println("Dealer: ", newDealerHand, ", ", newdealerPoints)
+		if newdealerPoints > 21 {
+			fmt.Println("Dealer Busts")
+			return
+		}
 	}
 
 	fmt.Println("Dealer Stands")
 
-	// newDealerScore = summation(newDealer)
+	// newdealerPoints = summation(newDealer)
 
 	return
 
 }
 
-func checkScore(dealerScore, playerScore int) {
-	if playerScore > dealerScore && playerScore <= 21 {
+func checkScore(dealerPoints, playerPoints int) int {
+	result := 0
+	if playerPoints <= 21 && dealerPoints <= 21 {
+		if playerPoints > dealerPoints {
+			fmt.Println("Player Wins")
+			result = 1
+		} else if playerPoints == dealerPoints {
+			fmt.Println("Push")
+		} else {
+			fmt.Println("Dealer Wins")
+		}
+	} else if dealerPoints > 21 {
 		fmt.Println("Player Wins")
+		result = 1
 	}
-	if dealerScore > playerScore && dealerScore <= 21 {
-		fmt.Println("Dealer Wins")
-	}
-	if dealerScore == playerScore {
-		fmt.Println("Push")
-	}
+	return result
 }
